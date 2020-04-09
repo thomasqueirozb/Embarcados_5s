@@ -231,7 +231,6 @@ void task_lcd(void) {
   // criadas
   font_draw_text(&sourcecodepro_28, "OIMUNDO", 50, 50, 1);
   font_draw_text(&calibri_36, "Oi Mundo! #$!@", 50, 100, 1);
-  font_draw_text(&arial_72, "102456", 50, 200, 2);
 
   // strut local para armazenar msg enviada pela task do mxt
   touchData touch;
