@@ -35,7 +35,7 @@ uint32_t convert_axis_system_y(uint32_t touch_x);
 uint32_t convert_axis_system_x(uint32_t touch_y);
 void draw_screen(void);
 void draw_button_t(button_t but);
-int touched(touchData touch, button_t* botoes, uint32_t n);
+int process_touch(touchData touch, button_t* botoes, uint32_t n);
 
 void callback_but0(void);
 void callback_but1(void);
