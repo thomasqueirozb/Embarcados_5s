@@ -31,11 +31,9 @@ void task_lcd(void);
 void task_mxt(void);
 void mxt_handler(struct mxt_device *device, uint *x, uint *y);
 void font_draw_text(tFont *font, const char *text, int x, int y, int spacing);
-void update_screen(uint32_t tx, uint32_t ty);
 uint32_t convert_axis_system_y(uint32_t touch_x);
 uint32_t convert_axis_system_x(uint32_t touch_y);
 void draw_screen(void);
-void draw_button(uint32_t clicked);
 void draw_button_t(button_t but);
 int touched(touchData touch, button_t* botoes, uint32_t n);
 

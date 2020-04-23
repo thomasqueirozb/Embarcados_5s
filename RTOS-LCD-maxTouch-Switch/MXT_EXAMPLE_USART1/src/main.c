@@ -10,26 +10,11 @@
 #include "main.h"
 
 /************************************************************************/
-/* prototypes                                                           */
-/************************************************************************/
-void but1_callback(void);
-
-
-/************************************************************************/
 /* LCD + TOUCH                                                          */
 /************************************************************************/
-#define MAX_ENTRIES        10
+#define MAX_ENTRIES        10 // Tamanho maximo da fila de touch
 
 struct ili9488_opt_t g_ili9488_display_opt;
-const uint32_t BUTTON_W = 120;
-const uint32_t BUTTON_H = 150;
-const uint32_t BUTTON_BORDER = 2;
-const uint32_t BUTTON_X = ILI9488_LCD_WIDTH/2;
-const uint32_t BUTTON_Y = ILI9488_LCD_HEIGHT/2;
-
-/************************************************************************/
-/* Botoes lcd                                                           */
-/************************************************************************/
 
 
 /************************************************************************/
@@ -121,7 +106,7 @@ static void configure_lcd(void){
 /* funcoes                                                              */
 /************************************************************************/
 
-int touched(touchData touch, button_t* botoes, uint32_t n) {
+int process_touch(touchData touch, button_t* botoes, uint32_t n) {
   for (uint32_t i = 0; i < n; i++) {
     const uint32_t bx = botoes[i].x;
     const uint32_t by = botoes[i].y;
@@ -156,42 +141,16 @@ void draw_screen(void) {
   ili9488_draw_filled_rectangle(0, 0, ILI9488_LCD_WIDTH-1, ILI9488_LCD_HEIGHT-1);
 }
 
-void draw_button(uint32_t clicked) {
-  static uint32_t last_state = 255; // undefined
-  if(clicked == last_state) return;
-  
-  ili9488_set_foreground_color(COLOR_CONVERT(COLOR_BLACK));
-  ili9488_draw_filled_rectangle(BUTTON_X-BUTTON_W/2, BUTTON_Y-BUTTON_H/2, BUTTON_X+BUTTON_W/2, BUTTON_Y+BUTTON_H/2);
-  if(clicked) {
-    ili9488_set_foreground_color(COLOR_CONVERT(COLOR_TOMATO));
-    ili9488_draw_filled_rectangle(BUTTON_X-BUTTON_W/2+BUTTON_BORDER, BUTTON_Y+BUTTON_BORDER, BUTTON_X+BUTTON_W/2-BUTTON_BORDER, BUTTON_Y+BUTTON_H/2-BUTTON_BORDER);
-    } else {
-    ili9488_set_foreground_color(COLOR_CONVERT(COLOR_GREEN));
-    ili9488_draw_filled_rectangle(BUTTON_X-BUTTON_W/2+BUTTON_BORDER, BUTTON_Y-BUTTON_H/2+BUTTON_BORDER, BUTTON_X+BUTTON_W/2-BUTTON_BORDER, BUTTON_Y-BUTTON_BORDER);
-  }
-  last_state = clicked;
-}
-
 uint32_t convert_axis_system_x(uint32_t touch_y) {
   // entrada: 4096 - 0 (sistema de coordenadas atual)
   // saida: 0 - 320
-  return ILI9488_LCD_WIDTH - ILI9488_LCD_WIDTH*touch_y/4096;
+  return ILI9488_LCD_WIDTH - ILI9488_LCD_WIDTH * touch_y/4096;
 }
 
 uint32_t convert_axis_system_y(uint32_t touch_x) {
   // entrada: 0 - 4096 (sistema de coordenadas atual)
   // saida: 0 - 320
-  return ILI9488_LCD_HEIGHT*touch_x/4096;
-}
-
-void update_screen(uint32_t tx, uint32_t ty) {
-  if(tx >= BUTTON_X-BUTTON_W/2 && tx <= BUTTON_X + BUTTON_W/2) {
-    if(ty >= BUTTON_Y-BUTTON_H/2 && ty <= BUTTON_Y) {
-      draw_button(1);
-      } else if(ty > BUTTON_Y && ty < BUTTON_Y + BUTTON_H/2) {
-      draw_button(0);
-    }
-  }
+  return ILI9488_LCD_HEIGHT * touch_x/4096;
 }
 
 void font_draw_text(tFont *font, const char *text, int x, int y, int spacing) {
@@ -293,12 +252,12 @@ void task_lcd(void){
     draw_button_t(botoes[i]);
   }
 
-  // strut local para armazenar msg enviada pela task do mxt
+  // struct local para armazenar msg enviada pela task do mxt
   touchData touch;
   
   while (true) {
     if (xQueueReceive( xQueueTouch, &(touch), ( TickType_t )  500 / portTICK_PERIOD_MS)) {
-      const int idx = touched(touch, botoes, n_but);
+      const int idx = process_touch(touch, botoes, n_but);
       if (idx != -1) {
         button_t *b = (button_t *)&botoes[idx];
         b->callback();
