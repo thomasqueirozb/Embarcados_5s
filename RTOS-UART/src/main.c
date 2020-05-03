@@ -5,12 +5,12 @@
 #include "oled.h"
 #include "rtos_tasks.h"
 
-// #define c(_a, _b) _a##_b
-// #define TASK_CREATE(FUNCTION, NAME)										\
-// if (xTaskCreate(FUNCTION, #NAME, c(TASK_##NAME, _STACK_SIZE), NULL,		\
-// c(TASK_##NAME, _STACK_PRIORITY), NULL) != pdPASS) {						\
-// printf("Failed to create " #NAME " task\r\n");							\
-// }
+#define c(_a, _b) _a##_b
+#define TASK_CREATE(FUNCTION, NAME)										\
+if (xTaskCreate(FUNCTION, #NAME, c(TASK_##NAME, _STACK_SIZE), NULL,		\
+c(TASK_##NAME, _STACK_PRIORITY), NULL) != pdPASS) {						\
+	printf("Failed to create " #NAME " task\r\n");						\
+}
 
 
 /** Semaforo a ser usado pela task led */
@@ -128,43 +128,13 @@ int main(void){
 	printf("-- Freertos Example --\n\r");
 	printf("-- %s\n\r", BOARD_NAME);
 	printf("-- Compiled: %s %s --\n\r", __DATE__, __TIME__);
-
-	/* Create task to monitor processor activity */
-	if (xTaskCreate(task_monitor, "Monitor", TASK_MONITOR_STACK_SIZE, NULL, TASK_MONITOR_STACK_PRIORITY, NULL) != pdPASS)
-	{
-		printf("Failed to create Monitor task\r\n");
-	}
-
-	if (xTaskCreate(task_led, "Led", TASK_LED_STACK_SIZE, NULL,
-			TASK_LED_STACK_PRIORITY, NULL) != pdPASS) {
-		printf("Failed to create test led task\r\n");
-	}
-
-	if (xTaskCreate(task_led2, "Led2", TASK_LED2_STACK_SIZE, NULL,
-					TASK_LED2_STACK_PRIORITY, NULL) != pdPASS) {
-		printf("Failed to create test led2 task\r\n");
-	}
-
-	if (xTaskCreate(task_led3, "Led3", TASK_LED3_STACK_SIZE, NULL,
-					TASK_LED3_STACK_PRIORITY, NULL) != pdPASS) {
-		printf("Failed to create test led3 task\r\n");
-	}
-
-	if (xTaskCreate(task_led1, "Led1", TASK_LED1_STACK_SIZE, NULL,
-	TASK_LED1_STACK_PRIORITY, NULL) != pdPASS) {
-		printf("Failed to create test led1 task\r\n");
-	}
-
-	if (xTaskCreate(task_uartRx, "UartRx", TASK_UARTRX_STACK_SIZE, NULL,
-					TASK_UARTRX_STACK_PRIORITY, NULL) != pdPASS) {
-		printf("Failed to create UartRx task\r\n");
-	}
-
-	if (xTaskCreate(task_execute, "EXECUTE", TASK_EXECUTE_STACK_SIZE, NULL,
-	TASK_EXECUTE_STACK_PRIORITY, NULL) != pdPASS) {
-		printf("Failed to create EXECUTE task\r\n");
-	}
-
+ 	TASK_CREATE(task_monitor, MONITOR);
+ 	TASK_CREATE(task_led, LED);
+ 	TASK_CREATE(task_led1, LED2);
+	TASK_CREATE(task_led2, LED2);
+	TASK_CREATE(task_led3, LED3);
+	TASK_CREATE(task_uartRx, UARTRX);
+	TASK_CREATE(task_execute, EXECUTE);
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
